@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yantra · ProcessRepo · Knowledge Base</title>
+<style>
+:root {
+  --bg: #FAF8F2;
+  --panel: #ffffff;
+  --border: #E5E2D8;
+  --border-2: #D3D1C7;
+  --fg: #2C2C2A;
+  --mute: #5F5E5A;
+  --dim: #8F8D86;
+  --coral: #D85A30;
+  --amber: #BA7517;
+  --teal: #1D9E75;
+  --purple: #7C5CBF;
+  --blue: #2B6CB0;
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); font-family: var(--sans); font-size: 13px; color: var(--fg); -webkit-font-smoothing: antialiased; }
+
+/* ===== APP SHELL ===== */
+.app { display: flex; flex-direction: column; height: 100vh; }
+.topbar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 16px; height: 44px;
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ===== TOPBAR ===== */
+.brand { font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }
+.instance-tag {
+  font-size: 11px; color: var(--mute);
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 10px;
+}
+.nav-global { display: flex; gap: 1px; margin-left: 16px; }
+.ng-item {
+  padding: 0 12px; height: 44px;
+  display: flex; align-items: center;
+  font-size: 12px; font-weight: 500; color: var(--mute);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.ng-item.active { color: var(--fg); border-bottom-color: var(--coral); }
+.ng-item:hover:not(.active) { color: var(--fg); }
+.ng-badge {
+  font-family: var(--mono); font-size: 10px; margin-left: 5px;
+  background: #FEF0EB; color: var(--coral);
+  padding: 1px 5px; border-radius: 8px;
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.status-pill {
+  font-size: 11px; color: var(--teal);
+  background: #E8F8F2; border: 1px solid #B5E8D5;
+  padding: 2px 8px; border-radius: 10px;
+  display: flex; align-items: center; gap: 5px;
+}
+.status-pill::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--teal);
+}
+.avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--coral); color: #fff;
+  font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 232px; background: #fff; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+}
+.sb-section { padding: 14px 10px 6px; }
+.sb-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--dim);
+  padding: 0 6px; margin-bottom: 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 6px; border-radius: 5px;
+  cursor: pointer; color: var(--mute); font-size: 12px;
+  transition: background 0.1s;
+}
+.sb-item:hover { background: var(--bg); color: var(--fg); }
+.sb-item.active { background: #FEF0EB; color: var(--coral); font-weight: 500; }
+.sb-item .icon { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+.sb-badge {
+  margin-left: auto; font-size: 10px; font-family: var(--mono);
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 1px 5px; border-radius: 8px; color: var(--dim);
+}
+.sb-item.active .sb-badge { background: #FAE0D8; border-color: #F5C4B5; color: var(--coral); }
+.sb-group-label {
+  font-size: 11px; font-weight: 600; color: var(--dim);
+  padding: 5px 6px 2px; cursor: default; display: flex; align-items: center; gap: 6px;
+}
+.sb-sub { padding-left: 20px; }
+.sb-sub .sb-item { padding: 4px 6px; font-size: 11px; }
+.sb-divider { height: 1px; background: var(--border); margin: 6px 10px; }
+
+/* ===== CONTENT AREA ===== */
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ===== SKILL HEADER ===== */
+.skill-header {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 14px 20px 0; flex-shrink: 0;
+}
+.skill-breadcrumb { font-size: 11px; color: var(--dim); margin-bottom: 6px; }
+.skill-breadcrumb span { color: var(--border-2); }
+.skill-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.skill-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+.v-badge {
+  font-family: var(--mono); font-size: 11px;
+  background: var(--bg); border: 1px solid var(--border-2);
+  padding: 2px 7px; border-radius: 10px; color: var(--mute);
+}
+.live-badge {
+  font-size: 11px; color: var(--teal);
+  background: #E8F8F2; border: 1px solid #B5E8D5;
+  padding: 2px 8px; border-radius: 10px;
+  display: flex; align-items: center; gap: 5px;
+}
+.live-badge::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--teal); animation: blink 1.6s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.skill-meta { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--mute); margin-bottom: 10px; }
+.meta-group { display: flex; align-items: center; gap: 5px; }
+.dep-tag {
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 1px 6px; border-radius: 8px;
+  font-family: var(--mono); font-size: 10px; color: var(--fg);
+}
+.dep-tag.policy { border-color: #C4B5E8; background: #F4F0FF; color: var(--purple); }
+.dep-tag.connector { border-color: #B5D0E8; background: #EEF4FF; color: var(--blue); }
+.dep-tag.track { border-color: #F5C4B5; background: #FEF0EB; color: var(--coral); }
+
+/* ===== MODE TABS ===== */
+.mode-tabs { display: flex; gap: 0; border-top: 1px solid var(--border); margin-top: 8px; }
+.mode-tab {
+  padding: 9px 16px; font-size: 12px; font-weight: 500;
+  color: var(--mute); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: flex; align-items: center; gap: 6px;
+  user-select: none;
+}
+.mode-tab.active { color: var(--fg); border-bottom-color: var(--coral); }
+.mode-tab:hover:not(.active) { color: var(--fg); }
+
+/* ===== TAB CONTENT ===== */
+.tab-content { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+.tab-content.active { display: block; }
+
+/* ===== CARDS ===== */
+.card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px; margin-bottom: 12px;
+}
+.card-title { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--fg); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 7px 13px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; cursor: pointer; border: none;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--sans);
+}
+.btn-primary { background: var(--coral); color: #fff; }
+.btn-primary:hover { background: #C04826; }
+.btn-secondary { background: #fff; color: var(--fg); border: 1px solid var(--border-2); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { background: #178A63; }
+.btn-outline { background: transparent; color: var(--mute); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); color: var(--fg); }
+.btn-ghost { background: transparent; color: var(--mute); border: none; font-size: 11px; padding: 4px 8px; }
+.btn-ghost:hover { color: var(--fg); }
+
+/* ===== STATS ROW ===== */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+.stat-num { font-size: 22px; font-weight: 600; font-family: var(--mono); color: var(--fg); }
+.stat-label { font-size: 11px; color: var(--mute); margin-top: 2px; }
+.stat-delta { font-size: 10px; color: var(--teal); margin-top: 4px; }
+.stat-delta.warn { color: var(--amber); }
+
+/* ===== CHANNEL ITEMS ===== */
+.ch-item {
+  display: flex; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.ch-item:last-child { border-bottom: none; }
+.ch-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.ch-body { flex: 1; min-width: 0; }
+.ch-id { font-family: var(--mono); font-size: 11px; color: var(--mute); }
+.ch-title { font-size: 12px; font-weight: 500; margin: 2px 0; }
+.ch-sub { font-size: 11px; color: var(--dim); }
+.ch-time { font-size: 10px; color: var(--dim); flex-shrink: 0; }
+.status-chip { font-size: 10px; padding: 1px 7px; border-radius: 8px; display: inline-flex; align-items: center; gap: 3px; }
+.chip-hitl { background: #FEF0EB; color: var(--coral); border: 1px solid #F5C4B5; }
+.chip-live { background: #E8F8F2; color: var(--teal); border: 1px solid #B5E8D5; }
+.chip-done { background: var(--bg); color: var(--mute); border: 1px solid var(--border); }
+.chip-esc { background: #FEF8EC; color: var(--amber); border: 1px solid #F5D5A5; }
+
+/* ===== KERNEL RULES TABLE ===== */
+.k-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.k-table th { text-align: left; padding: 6px 8px; font-weight: 600; color: var(--mute); border-bottom: 1px solid var(--border); }
+.k-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.k-table tr:last-child td { border-bottom: none; }
+.rule-id { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+/* ===== AUDIT TRAIL ===== */
+.trail { padding-left: 18px; }
+.trail-item { position: relative; padding-bottom: 14px; }
+.trail-item::before {
+  content: ''; position: absolute; left: -12px; top: 7px; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.trail-item:last-child::before { display: none; }
+.trail-dot {
+  position: absolute; left: -16px; top: 4px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border-2); border: 2px solid #fff;
+}
+.td-read { background: var(--blue); }
+.td-api { background: var(--purple); }
+.td-kernel { background: var(--amber); }
+.td-hitl { background: var(--coral); }
+.td-done { background: var(--teal); }
+.trail-ts { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+.trail-action { font-size: 12px; font-weight: 500; margin: 2px 0; }
+.trail-detail { font-size: 11px; color: var(--mute); line-height: 1.5; }
+.tag {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-family: var(--mono);
+  padding: 1px 5px; border-radius: 4px; margin-right: 3px;
+}
+.tag-read { background: #EEF4FF; color: var(--blue); }
+.tag-api { background: #F4F0FF; color: var(--purple); }
+.tag-mock { background: #F0FBF7; color: var(--teal); }
+.tag-kernel { background: #FEF8EC; color: var(--amber); }
+.tag-hitl { background: #FEF0EB; color: var(--coral); }
+.tag-write { background: #E8F8F2; color: var(--teal); }
+
+/* ===== SUB-TABS ===== */
+.sub-tabs {
+  display: flex; border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden; width: fit-content;
+  margin-bottom: 16px;
+}
+.sub-tab {
+  padding: 6px 14px; font-size: 12px; color: var(--mute);
+  cursor: pointer; background: var(--bg); user-select: none;
+}
+.sub-tab.active { background: #fff; color: var(--fg); font-weight: 500; }
+.sub-tab:hover:not(.active) { color: var(--fg); }
+
+/* ===== TEST LAYOUT ===== */
+.test-grid { display: grid; grid-template-columns: 270px 1fr; gap: 12px; }
+.form-group { margin-bottom: 10px; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--mute); display: block; margin-bottom: 3px; }
+.form-input, .form-select {
+  width: 100%; border: 1px solid var(--border-2); border-radius: 5px;
+  padding: 6px 8px; font-size: 12px; font-family: var(--sans);
+  color: var(--fg); background: #fff; outline: none;
+}
+.form-input:focus, .form-select:focus { border-color: var(--coral); box-shadow: 0 0 0 2px rgba(216,90,48,0.08); }
+
+/* ===== STEP TRACE ===== */
+.step-item {
+  padding: 8px 10px; border-radius: 5px; margin-bottom: 4px;
+  background: var(--bg); border: 1px solid var(--border); font-size: 11px;
+}
+.step-done { border-color: #B5E8D5; background: #F0FBF7; }
+.step-kernel { border-color: #F5D5A5; background: #FEF8EC; }
+.step-hitl { border-color: #F5C4B5; background: #FEF0EB; }
+.step-pending { opacity: 0.4; }
+.step-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+
+/* ===== DIFF VIEW ===== */
+.diff-block {
+  font-family: var(--mono); font-size: 11px; line-height: 1.7;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px; overflow-x: auto;
+}
+.diff-add { color: #1A6B4A; background: #E8F8F2; padding: 0 3px; border-radius: 2px; }
+.diff-rem { color: #8B2E10; background: #FEF0EB; padding: 0 3px; border-radius: 2px; text-decoration: line-through; }
+.diff-ctx { color: var(--dim); }
+
+/* ===== IMPACT TABLE ===== */
+.impact-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.impact-table th { text-align: left; padding: 6px 8px; font-weight: 600; color: var(--mute); border-bottom: 1px solid var(--border); }
+.impact-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+.impact-table tr:last-child td { border-bottom: none; }
+.i-badge { font-size: 10px; padding: 1px 7px; border-radius: 8px; white-space: nowrap; }
+.i-same { background: var(--bg); color: var(--mute); border: 1px solid var(--border); }
+.i-esc { background: #FEF8EC; color: var(--amber); border: 1px solid #F5D5A5; }
+.i-dec { background: #FEF0EB; color: var(--coral); border: 1px solid #F5C4B5; }
+
+/* ===== SUPPORT ===== */
+.sop-step { display: flex; gap: 10px; margin-bottom: 10px; }
+.sop-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--coral); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  margin-top: 1px;
+}
+.sop-text { font-size: 12px; line-height: 1.5; }
+.sop-text strong { display: block; font-weight: 600; margin-bottom: 2px; }
+.faq-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-size: 12px; font-weight: 500; margin-bottom: 5px; display: flex; gap: 7px; align-items: flex-start; }
+.faq-q-marker {
+  font-size: 9px; font-family: var(--mono); font-weight: 600;
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 1px 5px; border-radius: 4px; color: var(--dim);
+  flex-shrink: 0; margin-top: 1px;
+}
+.faq-a { font-size: 11px; color: var(--mute); line-height: 1.6; }
+.esc-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px; border-radius: 6px; margin-bottom: 6px;
+}
+
+/* ===== TRAIN ===== */
+.scenario-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 7px; padding: 13px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.scenario-card:hover { border-color: #C0BEB8; }
+.scenario-card.sel { border-color: var(--coral); box-shadow: 0 0 0 2px rgba(216,90,48,0.1); }
+.sc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.sc-title { font-size: 12px; font-weight: 600; flex: 1; }
+.diff-pill { font-size: 10px; padding: 1px 7px; border-radius: 8px; }
+.diff-easy { background: #E8F8F2; color: var(--teal); border: 1px solid #B5E8D5; }
+.diff-med { background: #FEF8EC; color: var(--amber); border: 1px solid #F5D5A5; }
+.diff-hard { background: #FEF0EB; color: var(--coral); border: 1px solid #F5C4B5; }
+.sc-desc { font-size: 11px; color: var(--mute); line-height: 1.5; }
+.sc-footer { margin-top: 6px; display: flex; align-items: center; }
+.cert-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.cert-fill { height: 100%; background: var(--teal); border-radius: 3px; }
+.cert-staff { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+.cert-staff:last-child { border-bottom: none; }
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+  width: 252px; border-left: 1px solid var(--border); background: #fff;
+  display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0;
+}
+.rp-section { padding: 13px 13px 10px; border-bottom: 1px solid var(--border); }
+.rp-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 8px;
+}
+.rp-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 11px; }
+.rp-key { color: var(--mute); }
+.rp-val { font-family: var(--mono); font-size: 10px; color: var(--fg); font-weight: 500; }
+.v-pill {
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 7px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--mute); cursor: pointer;
+}
+.v-pill.head { background: var(--fg); color: #fff; border-color: var(--fg); }
+.v-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.conn-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 11px; }
+.conn-live { font-size: 10px; color: var(--teal); }
+.act-item { padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+.act-item:last-child { border-bottom: none; }
+.act-ts { font-size: 10px; color: var(--dim); font-family: var(--mono); margin-bottom: 2px; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="brand">Yantra</div>
+    <div class="instance-tag">CredMitra · NBFC</div>
+
+    <nav class="nav-global">
+      <div class="ng-item" onclick="navAlert('Ops Console')">Ops Console</div>
+      <div class="ng-item active">Knowledge Base</div>
+      <div class="ng-item" onclick="window.open('option-1-channel.html','_blank')">Channels</div>
+      <div class="ng-item" onclick="navAlert('HITL Queue')">My Queue <span class="ng-badge">3</span></div>
+      <div class="ng-item" onclick="navAlert('Dreams Review')">Dreams</div>
+      <div class="ng-item" onclick="navAlert('Agent Registry')">Agents</div>
+    </nav>
+
+    <div class="topbar-right">
+      <div class="status-pill">Systems nominal</div>
+      <div class="avatar">RK</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ===== SIDEBAR — KNOWLEDGE BASE TREE ===== -->
+    <nav class="sidebar">
+
+      <!-- CHARTER -->
+      <div class="sb-section">
+        <div class="sb-label">Foundation</div>
+        <div class="sb-item" onclick="navAlert('CharterSkill: CredMitra v2.0 — one per institution')">
+          <span class="icon">📋</span> CharterSkill <span class="sb-badge">v2</span>
+        </div>
+      </div>
+      <div class="sb-divider"></div>
+
+      <!-- POLICY SKILLS -->
+      <div class="sb-section">
+        <div class="sb-label">PolicySkills</div>
+        <div class="sb-item" onclick="navAlert('Credit Policy v1.4 — governs loan-origination, collections, restructuring')">
+          <span class="icon">📜</span> Credit Policy <span class="sb-badge">v1.4</span>
+        </div>
+        <div class="sb-item" onclick="navAlert('KYC Policy v2.1 — governs customer-onboarding, periodic-refresh')">
+          <span class="icon">📜</span> KYC Policy <span class="sb-badge">v2.1</span>
+        </div>
+        <div class="sb-item" onclick="navAlert('Fair Practices v1.1 — governs collections, servicing')">
+          <span class="icon">📜</span> Fair Practices <span class="sb-badge">v1.1</span>
+        </div>
+        <div class="sb-item" onclick="navAlert('Collections Policy v1.0')">
+          <span class="icon">📜</span> Collections Policy <span class="sb-badge">v1.0</span>
+        </div>
+        <div class="sb-item" onclick="navAlert('Customer Protection v1.2')">
+          <span class="icon">📜</span> Customer Protection <span class="sb-badge">v1.2</span>
+        </div>
+      </div>
+      <div class="sb-divider"></div>
+
+      <!-- PROCESS REPO -->
+      <div class="sb-section">
+        <div class="sb-label">ProcessRepo</div>
+
+        <div class="sb-group-label">⚙ Lending</div>
+        <div class="sb-sub">
+          <div class="sb-item active">loan-origination <span class="sb-badge">v1.3</span></div>
+          <div class="sb-item" onclick="navAlert('collections ProcessSkill — operationalizes Collections Policy + Fair Practices')">collections <span class="sb-badge">v1.1</span></div>
+          <div class="sb-item" onclick="navAlert('restructuring ProcessSkill — v0.8 draft, not yet live')">restructuring <span class="sb-badge">v0.8</span></div>
+        </div>
+
+        <div class="sb-group-label" style="margin-top:4px;">⚙ KYC</div>
+        <div class="sb-sub">
+          <div class="sb-item" onclick="navAlert('customer-onboarding ProcessSkill — operationalizes KYC Policy v2.1')">customer-onboarding <span class="sb-badge">v2.0</span></div>
+          <div class="sb-item" onclick="navAlert('periodic-refresh ProcessSkill — RBI annual KYC update cycle')">periodic-refresh <span class="sb-badge">v1.0</span></div>
+        </div>
+
+        <div class="sb-group-label" style="margin-top:4px;">⚙ Compliance</div>
+        <div class="sb-sub">
+          <div class="sb-item" onclick="navAlert('regulatory-change-mgmt — the commercial wedge: RBI circular → impact analysis → policy amendment → sign-off')">regulatory-change-mgmt <span class="sb-badge">v1.2</span></div>
+          <div class="sb-item" onclick="navAlert('rbi-inspection-prep — generates inspection-ready audit packs in minutes')">rbi-inspection-prep <span class="sb-badge">v1.0</span></div>
+        </div>
+
+        <div class="sb-group-label" style="margin-top:4px;">⚙ Servicing</div>
+        <div class="sb-sub">
+          <div class="sb-item" onclick="navAlert('complaint-handling — operationalizes Customer Protection Policy')">complaint-handling <span class="sb-badge">v1.3</span></div>
+          <div class="sb-item" onclick="navAlert('noc-issuance — automated NOC generation on loan closure')">noc-issuance <span class="sb-badge">v1.0</span></div>
+        </div>
+      </div>
+      <div class="sb-divider"></div>
+
+      <!-- PROCESS CONNECTORS -->
+      <div class="sb-section">
+        <div class="sb-label">ProcessConnectors</div>
+        <div class="sb-item" onclick="navAlert('CIBIL/Experian connector — bureau pull, loan-stacking check')"><span class="icon">🔌</span> CIBIL / Experian</div>
+        <div class="sb-item" onclick="navAlert('Account Aggregator connector — Sahamati, 18-month statements')"><span class="icon">🔌</span> Account Aggregator</div>
+        <div class="sb-item" onclick="navAlert('CKYC connector — Central KYC Registry')"><span class="icon">🔌</span> CKYC</div>
+        <div class="sb-item" onclick="navAlert('Finacle Core connector — account lookup, booking events')"><span class="icon">🔌</span> Finacle Core</div>
+        <div class="sb-item" onclick="navAlert('UPI / eNACH connector — disbursement and mandate setup')"><span class="icon">🔌</span> UPI / eNACH</div>
+        <div class="sb-item" style="font-size:11px;color:var(--dim);cursor:default;padding-left:22px;">+ 7 more connectors</div>
+      </div>
+      <div class="sb-divider"></div>
+
+      <!-- TRANSITION LOG -->
+      <div class="sb-section">
+        <div class="sb-label">TransitionLog</div>
+        <div class="sb-item" onclick="navAlert('2 active transitions: (1) credit-policy v1.4→v1.5 under review, (2) Finacle connector v2 migration')"><span class="icon">⚡</span> Active transitions <span class="sb-badge">2</span></div>
+        <div class="sb-item" onclick="navAlert('Historical transition records — complete change log since inception')"><span class="icon">📁</span> History</div>
+      </div>
+
+    </nav><!-- /sidebar -->
+
+    <!-- ===== CENTER CONTENT ===== -->
+    <div class="content">
+
+      <!-- SKILL HEADER -->
+      <div class="skill-header">
+        <div class="skill-breadcrumb">ProcessRepo <span>›</span> Lending <span>›</span> loan-origination</div>
+        <div class="skill-title-row">
+          <div class="skill-title">loan-origination</div>
+          <div class="v-badge">v1.3</div>
+          <div class="live-badge">Live</div>
+        </div>
+        <div class="skill-meta">
+          <div class="meta-group">
+            <span style="color:var(--dim)">Policies:</span>
+            <span class="dep-tag policy">credit-policy@v1.4</span>
+            <span class="dep-tag policy">kyc-policy@v2.1</span>
+            <span class="dep-tag policy">fair-practices@v1.1</span>
+          </div>
+          <div class="meta-group">
+            <span style="color:var(--dim)">Connectors:</span>
+            <span class="dep-tag connector">CIBIL</span>
+            <span class="dep-tag connector">AA</span>
+            <span class="dep-tag connector">CKYC</span>
+            <span class="dep-tag connector">Finacle</span>
+          </div>
+          <div class="meta-group">
+            <span class="dep-tag track">Track 1 · Kernel required</span>
+          </div>
+        </div>
+
+        <!-- MODE TABS -->
+        <div class="mode-tabs">
+          <div class="mode-tab active" data-tab="execute" onclick="switchTab('execute')">▶ Execute</div>
+          <div class="mode-tab" data-tab="audit"   onclick="switchTab('audit')">🔍 Audit</div>
+          <div class="mode-tab" data-tab="test"    onclick="switchTab('test')">⚗ Test</div>
+          <div class="mode-tab" data-tab="support" onclick="switchTab('support')">🛟 Support</div>
+          <div class="mode-tab" data-tab="train"   onclick="switchTab('train')">🎓 Train</div>
+        </div>
+      </div><!-- /skill-header -->
+
+      <!-- ======================================================
+           TAB: EXECUTE
+      ====================================================== -->
+      <div class="tab-content active" id="tab-execute">
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num">47</div>
+            <div class="stat-label">Transactions today</div>
+            <div class="stat-delta">↑ 12% vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">3</div>
+            <div class="stat-label">Paused for HITL</div>
+            <div class="stat-delta warn">2 waiting &gt; 4 h</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">8m 12s</div>
+            <div class="stat-label">Avg processing time</div>
+            <div class="stat-delta">↓ 18 s vs last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">98.3%</div>
+            <div class="stat-label">On-time SLA</div>
+            <div class="stat-delta">Target 95% ✓</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 310px;gap:12px;">
+
+          <!-- Live channel preview -->
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="card-title" style="margin:0">Live channel · latest transactions</div>
+              <button class="btn btn-primary" onclick="window.open('option-1-channel.html','_blank')">Open Channel →</button>
+            </div>
+
+            <div class="ch-item">
+              <div class="ch-dot" style="background:var(--amber)"></div>
+              <div class="ch-body">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                  <span class="ch-id">app_8821</span>
+                  <span class="status-chip chip-hitl">⏸ HITL</span>
+                </div>
+                <div class="ch-title">MSME WC · ₹18 L · Pune · Raj Enterprises</div>
+                <div class="ch-sub">Paused: Aadhaar addr mismatch + low-confidence OCR · waiting sr. underwriter</div>
+              </div>
+              <div class="ch-time">4 h 22 m ago</div>
+            </div>
+
+            <div class="ch-item">
+              <div class="ch-dot" style="background:var(--teal)"></div>
+              <div class="ch-body">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                  <span class="ch-id">app_8822</span>
+                  <span class="status-chip chip-live">● Processing</span>
+                </div>
+                <div class="ch-title">MSME WC · ₹12 L · Coimbatore · Lakshmi Traders</div>
+                <div class="ch-sub">Step 3 of 6 · Bureau pull + AA fetch in progress</div>
+              </div>
+              <div class="ch-time">23 m ago</div>
+            </div>
+
+            <div class="ch-item">
+              <div class="ch-dot" style="background:var(--coral)"></div>
+              <div class="ch-body">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                  <span class="ch-id">app_8819</span>
+                  <span class="status-chip chip-esc">⚠ Escalated</span>
+                </div>
+                <div class="ch-title">MSME WC · ₹22 L · Hyderabad · Krishna Exports</div>
+                <div class="ch-sub">Loan-stacking signal detected · routed to CRO queue</div>
+              </div>
+              <div class="ch-time">2 h 45 m ago</div>
+            </div>
+
+            <div class="ch-item">
+              <div class="ch-dot" style="background:var(--dim)"></div>
+              <div class="ch-body">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                  <span class="ch-id">app_8820</span>
+                  <span class="status-chip chip-done">✓ Approved</span>
+                </div>
+                <div class="ch-title">MSME WC · ₹8 L · Hyderabad · Sai Agencies</div>
+                <div class="ch-sub">Auto-approved · CIBIL 748 · AA clean · 7 m 34 s</div>
+              </div>
+              <div class="ch-time">1 h 10 m ago</div>
+            </div>
+
+            <div class="ch-item">
+              <div class="ch-dot" style="background:var(--dim)"></div>
+              <div class="ch-body">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;">
+                  <span class="ch-id">app_8818</span>
+                  <span class="status-chip chip-done">✗ Declined</span>
+                </div>
+                <div class="ch-title">MSME WC · ₹15 L · Chennai · TN Textiles</div>
+                <div class="ch-sub">Kernel rule KR-LO-006 · CIBIL &lt; 620 · auto-decline</div>
+              </div>
+              <div class="ch-time">3 h 05 m ago</div>
+            </div>
+          </div>
+
+          <!-- Right column: kernel rules + process steps -->
+          <div>
+            <div class="card">
+              <div class="card-title">Kernel rules · active (5 of 11)</div>
+              <table class="k-table">
+                <thead>
+                  <tr><th>ID</th><th>Condition</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><span class="rule-id">KR-LO-001</span></td><td>Loan &gt; ₹25 L</td><td>→ UW queue</td></tr>
+                  <tr><td><span class="rule-id">KR-LO-002</span></td><td>CIBIL &lt; 650</td><td>→ CRO queue</td></tr>
+                  <tr><td><span class="rule-id">KR-LO-003</span></td><td>≥ 2 amber flags</td><td>→ HITL pause</td></tr>
+                  <tr><td><span class="rule-id">KR-LO-006</span></td><td>CIBIL &lt; 620</td><td>Auto-decline</td></tr>
+                  <tr><td><span class="rule-id">KR-LO-009</span></td><td>Loan-stack flag</td><td>→ CRO queue</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top:8px;">
+                <button class="btn btn-ghost" onclick="navAlert('Full kernel rules editor — 11 rules, version-controlled, human-readable')">View all 11 rules →</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Process steps</div>
+              <div style="font-size:11px;color:var(--mute);">
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>1 · Identity verify (CKYC)</span><span style="color:var(--teal)">~30 s</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>2 · Bureau pull (CIBIL)</span><span style="color:var(--teal)">~45 s</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>3 · Financial fetch (AA)</span><span style="color:var(--teal)">~90 s</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>4 · UW evaluation + kernel</span><span style="color:var(--amber)">~5 m</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);"><span>5 · Decision log (ProcessArtifact)</span><span style="color:var(--teal)">~5 s</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;"><span>6 · Booking event (Finacle)</span><span style="color:var(--teal)">~30 s</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-execute -->
+
+
+      <!-- ======================================================
+           TAB: AUDIT
+      ====================================================== -->
+      <div class="tab-content" id="tab-audit">
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Audit · loan-origination</div>
+            <div style="font-size:11px;color:var(--mute);">Every decision is traceable to the exact policy version, kernel rule, and agent session that produced it. The compliance log is the operational log.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button class="btn btn-secondary" onclick="navAlert('Generates compliance pack for the selected date range — policy versions, decision counts, HITL rate, kernel rule activations')">📄 Generate Compliance Pack</button>
+            <button class="btn btn-teal" onclick="navAlert('Exports RBI-inspection-ready pack — all decisions, policy pins, agent reasoning traces, HITL log, in PDF + JSON')">🏛 Export for RBI Inspection</button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input id="auditSearch" type="text"
+            style="flex:1;border:1px solid var(--border-2);border-radius:6px;padding:7px 10px;font-size:12px;font-family:var(--sans);color:var(--fg);background:#fff;outline:none;"
+            placeholder="Look up by case ID, customer name, or date range…" value="app_8821" />
+          <button class="btn btn-primary" onclick="navAlert('Reconstructing decision for app_8821 from the operational log…')">Reconstruct Decision →</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 268px;gap:12px;">
+
+          <!-- Decision trail -->
+          <div class="card">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;">
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;">app_8821 · Raj Enterprises · MSME WC ₹18 L · Pune</div>
+                <div style="font-size:11px;color:var(--mute);margin-top:3px;">
+                  <span style="color:var(--teal);font-weight:500;">✓ Approved ₹16 L</span>
+                  · Sr. underwriter override · 2026-05-10 21:47:33 IST
+                </div>
+              </div>
+              <button class="btn btn-secondary" style="font-size:11px;flex-shrink:0;" onclick="navAlert('Downloads full decision log as PDF — suitable for audit, ombudsman, regulator')">↓ Download PDF</button>
+            </div>
+
+            <div class="trail">
+
+              <div class="trail-item">
+                <div class="trail-dot td-read"></div>
+                <div class="trail-ts">19:39:14</div>
+                <div class="trail-action"><span class="tag tag-read">READ</span> org/credit-policy.md · sha256:a4f7c2…</div>
+                <div class="trail-detail">credit-policy@v1.4 · §4.2 escalation thresholds, §8.1 intra-city tolerance · pinned at session start</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-read"></div>
+                <div class="trail-ts">19:39:15</div>
+                <div class="trail-action"><span class="tag tag-read">READ</span> org/kyc-policy.md · sha256:b8d3e1…</div>
+                <div class="trail-detail">kyc-policy@v2.1 · MSME document requirements · Aadhaar address verification rules</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-api"></div>
+                <div class="trail-ts">19:39:48</div>
+                <div class="trail-action"><span class="tag tag-api">API</span> CKYC connector · identity verify</div>
+                <div class="trail-detail">Identity confirmed. Aadhaar linked. Address on record: Kothrud, Pune. Application address: Hadapsar. Distance: 8 km → amber flag 1</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-api"></div>
+                <div class="trail-ts">19:40:31</div>
+                <div class="trail-action"><span class="tag tag-api">API</span> CIBIL connector · bureau pull</div>
+                <div class="trail-detail">Score: 710. Above KR-LO-006 floor (620). No loan-stacking signal. No adverse accounts.</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-api"></div>
+                <div class="trail-ts">19:42:04</div>
+                <div class="trail-action"><span class="tag tag-api">API</span> Account Aggregator · 18-month bank statements</div>
+                <div class="trail-detail">12 accounts, 4 primary. Avg monthly turnover ₹4.2 L. DSCR 1.4×. Consistent cash flows. ✓ Pass</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-read"></div>
+                <div class="trail-ts">19:42:51</div>
+                <div class="trail-action"><span class="tag tag-read">READ</span> team-uw/known-issues/cooperative-bank-credits.md</div>
+                <div class="trail-detail">Team institutional memory · written by session/uw-agent-0398 · 23 prior cases consulted</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-api"></div>
+                <div class="trail-ts">19:43:20</div>
+                <div class="trail-action"><span class="tag tag-api">API</span> Document parse · shop establishment certificate</div>
+                <div class="trail-detail">OCR confidence: 74% (address field partially illegible). → amber flag 2</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-kernel"></div>
+                <div class="trail-ts">19:44:17</div>
+                <div class="trail-action"><span class="tag tag-kernel">KERNEL</span> KR-LO-003 fired · policy deviation check</div>
+                <div class="trail-detail">2 amber flags raised. §4.2 threshold: ≥ 2 flags → HITL required. Kernel authorises only one path: pause and route to senior underwriter queue.</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-hitl"></div>
+                <div class="trail-ts">19:44:18</div>
+                <div class="trail-action"><span class="tag tag-hitl">HITL</span> Session paused · handoff written to team-uw/app-notes/8821.md</div>
+                <div class="trail-detail">Agent recommendation: Approve at ₹16 L (haircut per §8.1 intra-city) pending visual OCR confirmation</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-hitl"></div>
+                <div class="trail-ts">21:47:29</div>
+                <div class="trail-action"><span class="tag tag-hitl">HITL</span> Priya Sharma (sr. underwriter) · approved with rationale</div>
+                <div class="trail-detail">"Kothrud → Hadapsar, 8 km, intra-city within §8.1 tolerance. OCR confirmed on visual — legible, watermark issue only. Approved ₹16 L, 11% haircut." Written to team-uw/hitl-log/8821.md</div>
+              </div>
+
+              <div class="trail-item">
+                <div class="trail-dot td-done"></div>
+                <div class="trail-ts">21:47:33</div>
+                <div class="trail-action"><span class="tag tag-write">WROTE</span> DecisionLog ProcessArtifact · Finacle booking event</div>
+                <div class="trail-detail">Loan ID: FIN-2026-88210. Disbursed ₹16 L. All policy versions and sha256 hashes pinned in log.</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Right column: policy pins + stats -->
+          <div>
+            <div class="card">
+              <div class="card-title">Policy versions · governing this decision</div>
+              <div style="font-size:11px;">
+                <div style="padding:6px 0;border-bottom:1px solid var(--border);">
+                  <div style="color:var(--purple);font-weight:500;">credit-policy</div>
+                  <div style="font-family:var(--mono);font-size:10px;color:var(--fg);margin:2px 0;">v1.4 · sha256:a4f7c2…</div>
+                  <div style="font-size:10px;color:var(--dim);">§4.2 escalation, §8.1 intra-city cited</div>
+                </div>
+                <div style="padding:6px 0;border-bottom:1px solid var(--border);">
+                  <div style="color:var(--purple);font-weight:500;">kyc-policy</div>
+                  <div style="font-family:var(--mono);font-size:10px;color:var(--fg);margin:2px 0;">v2.1 · sha256:b8d3e1…</div>
+                  <div style="font-size:10px;color:var(--dim);">MSME doc requirements cited</div>
+                </div>
+                <div style="padding:6px 0;">
+                  <div style="color:var(--mute);font-weight:500;">loan-origination (ProcessSkill)</div>
+                  <div style="font-family:var(--mono);font-size:10px;color:var(--fg);margin:2px 0;">v1.3 · sha256:c1f9d4…</div>
+                  <div style="font-size:10px;color:var(--dim);">Kernel rule KR-LO-003 fired</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Agents involved</div>
+              <div style="font-size:11px;">
+                <div style="padding:5px 0;border-bottom:1px solid var(--border);"><div style="font-weight:500;">orchestrator-α</div><div style="color:var(--mute);">Routed, spawned child sessions</div></div>
+                <div style="padding:5px 0;border-bottom:1px solid var(--border);"><div style="font-weight:500;">uw-agent-0445</div><div style="color:var(--mute);">Underwriting · claude-opus-4-7</div></div>
+                <div style="padding:5px 0;"><div style="font-weight:500;">Priya Sharma</div><div style="color:var(--mute);">Sr. Underwriter · HITL override</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Process-level stats · all time</div>
+              <div class="rp-row"><span class="rp-key">Total decisions</span><span style="font-family:var(--mono);font-size:12px;font-weight:600;">1,847</span></div>
+              <div class="rp-row"><span class="rp-key">Auto-approved</span><span style="color:var(--teal);font-weight:500;font-size:12px;">1,402 (75.9%)</span></div>
+              <div class="rp-row"><span class="rp-key">HITL approved</span><span style="color:var(--amber);font-weight:500;font-size:12px;">312 (16.9%)</span></div>
+              <div class="rp-row"><span class="rp-key">Declined</span><span style="color:var(--coral);font-weight:500;font-size:12px;">133 (7.2%)</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-audit -->
+
+
+      <!-- ======================================================
+           TAB: TEST
+      ====================================================== -->
+      <div class="tab-content" id="tab-test">
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Test Sandbox · loan-origination</div>
+          <div style="font-size:11px;color:var(--mute);">Validate ProcessSkill behaviour before deploying to the live channel. No real connectors are called — all data is synthetic. Kernel rules execute against mock responses.</div>
+        </div>
+
+        <div class="sub-tabs" id="testSubTabs">
+          <div class="sub-tab active" onclick="switchSubTab('case-runner')">Case Runner (unit test)</div>
+          <div class="sub-tab" onclick="switchSubTab('policy-impact')">Policy Impact Simulator (regression)</div>
+        </div>
+
+        <!-- ---- CASE RUNNER ---- -->
+        <div id="sub-case-runner">
+          <div class="test-grid">
+
+            <!-- Inputs -->
+            <div class="card">
+              <div class="card-title">Test case inputs</div>
+              <div class="form-group">
+                <label class="form-label">Applicant</label>
+                <input class="form-input" type="text" value="Raj Enterprises, Pune" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan amount (₹)</label>
+                <input class="form-input" type="text" value="18,00,000" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Synthetic CIBIL score</label>
+                <input class="form-input" type="text" value="710" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Account Aggregator connected</label>
+                <select class="form-select"><option>Yes — 18-month statements</option><option>No — manual docs required</option></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Aadhaar address match</label>
+                <select class="form-select"><option>Partial — intra-city (8 km)</option><option>Full match</option><option>No match (inter-city)</option></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">OCR confidence on shop cert</label>
+                <select class="form-select"><option>Low — 74% (address partially illegible)</option><option>High — &gt; 90%</option></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Loan-stacking signal</label>
+                <select class="form-select"><option>None detected</option><option>Detected — 3 active external loans</option></select>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:4px;">
+                <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="navAlert('Running synthetic case through loan-origination@v1.3 — mocking CIBIL, AA, CKYC connectors. Kernel rules execute on real logic.')">▶ Run Test</button>
+                <button class="btn btn-secondary" onclick="navAlert('Load a preset: edge cases, happy path, boundary conditions')">Presets</button>
+              </div>
+            </div>
+
+            <!-- Trace + result -->
+            <div class="card">
+              <div class="card-title">Execution trace · synthetic run</div>
+
+              <div class="step-item step-done">
+                <div class="step-row">
+                  <span><span class="tag tag-read">READ</span> <strong>org/credit-policy.md · v1.4</strong></span>
+                  <span style="font-size:10px;color:var(--teal)">✓ 12 ms</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">§4.2 + §8.1 loaded · 2 relevant thresholds extracted</div>
+              </div>
+
+              <div class="step-item step-done">
+                <div class="step-row">
+                  <span><span class="tag tag-mock">MOCK</span> <strong>CKYC connector · identity verify</strong></span>
+                  <span style="font-size:10px;color:var(--teal)">✓ 31 ms</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">Identity confirmed. Addr: Kothrud → Application: Hadapsar (8 km) → amber flag 1</div>
+              </div>
+
+              <div class="step-item step-done">
+                <div class="step-row">
+                  <span><span class="tag tag-mock">MOCK</span> <strong>CIBIL connector · bureau pull</strong></span>
+                  <span style="font-size:10px;color:var(--teal)">✓ 44 ms</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">Score 710. Above KR-LO-006 floor (620). No loan-stacking. ✓ Pass</div>
+              </div>
+
+              <div class="step-item step-done">
+                <div class="step-row">
+                  <span><span class="tag tag-mock">MOCK</span> <strong>Account Aggregator · 18-month statements</strong></span>
+                  <span style="font-size:10px;color:var(--teal)">✓ 89 ms</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">Avg turnover ₹4.2 L/mo. DSCR 1.4×. ✓ Pass</div>
+              </div>
+
+              <div class="step-item step-done">
+                <div class="step-row">
+                  <span><span class="tag tag-mock">MOCK</span> <strong>Document parse · shop cert OCR 74%</strong></span>
+                  <span style="font-size:10px;color:var(--teal)">✓ 55 ms</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">OCR below 80% threshold → amber flag 2</div>
+              </div>
+
+              <div class="step-item step-kernel">
+                <div class="step-row">
+                  <span><span class="tag tag-kernel">KERNEL</span> <strong>KR-LO-003 · policy deviation check</strong></span>
+                  <span style="font-size:10px;color:var(--amber)">⚡ Fired</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">2 amber flags → §4.2 threshold crossed → HITL required. Kernel enforces pause — agent cannot bypass.</div>
+              </div>
+
+              <div class="step-item step-hitl">
+                <div class="step-row">
+                  <span><span class="tag tag-hitl">HITL</span> <strong>Session pauses · routes to sr. underwriter queue</strong></span>
+                  <span style="font-size:10px;color:var(--coral)">⏸ Expected</span>
+                </div>
+                <div style="font-size:10px;color:var(--mute)">Expected outcome per §8.1: APPROVE ₹16 L with haircut after visual OCR confirmation</div>
+              </div>
+
+              <div class="step-item step-pending">
+                <div class="step-row">
+                  <span><span class="tag tag-write">WRITE</span> <strong>DecisionLog + Finacle booking</strong></span>
+                  <span style="font-size:10px;color:var(--dim)">Pending HITL</span>
+                </div>
+                <div style="font-size:10px;color:var(--dim)">Will execute after human decision is recorded</div>
+              </div>
+
+              <div style="margin-top:12px;padding:10px;background:#F4F0FF;border:1px solid #C4B5E8;border-radius:6px;font-size:11px;">
+                <div style="font-weight:600;color:var(--purple);margin-bottom:3px;">Test result: PASS — behaviour matches spec</div>
+                <div style="color:var(--mute);">KR-LO-003 fires correctly at 2 flags. HITL trigger is expected and correct. No unexpected exits, no kernel bypasses. Estimated outcome (₹16 L haircut approval) is consistent with policy intent.</div>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /sub-case-runner -->
+
+        <!-- ---- POLICY IMPACT SIMULATOR ---- -->
+        <div id="sub-policy-impact" style="display:none;">
+          <div style="display:grid;grid-template-columns:300px 1fr;gap:12px;">
+
+            <div>
+              <div class="card">
+                <div class="card-title">Simulate policy version change</div>
+                <div class="form-group">
+                  <label class="form-label">PolicySkill</label>
+                  <select class="form-select"><option>credit-policy</option><option>kyc-policy</option><option>fair-practices</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">From version</label>
+                  <select class="form-select"><option>v1.4 (current · live)</option><option>v1.3</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">To version</label>
+                  <select class="form-select"><option>v1.5 (draft · under review)</option></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Case scope</label>
+                  <select class="form-select"><option>Pending cases (47)</option><option>Last 30 days (1,847)</option><option>Custom date range</option></select>
+                </div>
+                <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="navAlert('Runs policy impact simulation: re-evaluates each case with v1.5 rules and diffs the outcomes')">▶ Simulate Impact</button>
+              </div>
+
+              <div class="card">
+                <div class="card-title">credit-policy · v1.4 → v1.5 diff</div>
+                <div class="diff-block">
+                  <div class="diff-ctx">§ 8.1 Intra-city address tolerance</div>
+                  <div><span class="diff-rem">Distance threshold: 25 km</span></div>
+                  <div><span class="diff-add">Distance threshold: 15 km</span></div>
+                  <div class="diff-ctx">&nbsp;</div>
+                  <div class="diff-ctx">§ 4.2 HITL threshold</div>
+                  <div><span class="diff-rem">Escalate at ≥ 2 amber flags</span></div>
+                  <div><span class="diff-add">Escalate at ≥ 1 amber flag</span></div>
+                  <div class="diff-ctx">&nbsp;</div>
+                  <div class="diff-ctx">§ 6.3 DSCR floor</div>
+                  <div><span class="diff-rem">Minimum DSCR: 1.2×</span></div>
+                  <div><span class="diff-add">Minimum DSCR: 1.3×</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <div class="card-title" style="margin:0;">Impact on 47 pending cases</div>
+                <div style="display:flex;gap:6px;">
+                  <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:#E8F8F2;color:var(--teal);border:1px solid #B5E8D5;">30 unchanged</span>
+                  <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:#FEF8EC;color:var(--amber);border:1px solid #F5D5A5;">13 now escalate</span>
+                  <span style="font-size:11px;padding:2px 8px;border-radius:8px;background:#FEF0EB;color:var(--coral);border:1px solid #F5C4B5;">4 now decline</span>
+                </div>
+              </div>
+
+              <table class="impact-table">
+                <thead>
+                  <tr><th>Case</th><th>Amount</th><th>Current (v1.4)</th><th>With v1.5</th><th>Change reason</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8823</span></td>
+                    <td>₹9 L</td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td><span class="i-badge i-esc">→ HITL</span></td>
+                    <td style="font-size:10px;color:var(--mute);">§4.2 now fires at 1 flag; OCR 82%</td>
+                  </tr>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8824</span></td>
+                    <td>₹21 L</td>
+                    <td><span class="i-badge i-esc">HITL</span></td>
+                    <td><span class="i-badge i-dec">→ Decline</span></td>
+                    <td style="font-size:10px;color:var(--mute);">§8.1 addr 18 km — outside new 15 km threshold</td>
+                  </tr>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8826</span></td>
+                    <td>₹7 L</td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td><span class="i-badge i-esc">→ HITL</span></td>
+                    <td style="font-size:10px;color:var(--mute);">§4.2 partial addr match triggers at 1 flag</td>
+                  </tr>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8829</span></td>
+                    <td>₹14 L</td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td><span class="i-badge i-dec">→ Decline</span></td>
+                    <td style="font-size:10px;color:var(--mute);">§8.1 addr 22 km — outside new 15 km threshold</td>
+                  </tr>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8833</span></td>
+                    <td>₹11 L</td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td><span class="i-badge i-esc">→ HITL</span></td>
+                    <td style="font-size:10px;color:var(--mute);">§6.3 DSCR 1.25× — below new 1.3× floor</td>
+                  </tr>
+                  <tr>
+                    <td><span style="font-family:var(--mono);font-size:10px;">app_8831</span></td>
+                    <td>₹6 L</td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td><span class="i-badge i-same">Auto-approve</span></td>
+                    <td style="font-size:10px;color:var(--mute);">No relevant flags; unchanged</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div style="margin-top:12px;padding:10px;background:#FEF8EC;border:1px solid #F5D5A5;border-radius:6px;font-size:11px;">
+                <div style="font-weight:600;color:var(--amber);margin-bottom:3px;">⚠ CRO sign-off required before activating v1.5</div>
+                <div style="color:var(--mute);">4 cases currently auto-approved would become declines under v1.5. Yantra will not apply the new policy version until an authorised approver reviews these 4 cases and signs off on the impact. Click "Request CRO Review" to queue the diff for approval.</div>
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px;">
+                <button class="btn btn-secondary" onclick="navAlert('Opens the 4 affected cases for individual review before policy activation')">Review 4 affected cases</button>
+                <button class="btn btn-primary" onclick="navAlert('Queues the v1.5 impact diff for CRO sign-off — policy will not activate until approved')">Request CRO Review →</button>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /sub-policy-impact -->
+
+      </div><!-- /tab-test -->
+
+
+      <!-- ======================================================
+           TAB: SUPPORT
+      ====================================================== -->
+      <div class="tab-content" id="tab-support">
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Support · loan-origination</div>
+            <div style="font-size:11px;color:var(--mute);">Auto-generated from the live ProcessSkill + its PolicySkill dependencies. Always current — regenerated whenever the skill or any bound policy changes. Agents read this as their grounding context when supporting ops staff or customers.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button class="btn btn-secondary" onclick="navAlert('Downloads SOP as PDF — suitable for ops staff training packs, branch distribution')">↓ Download SOP</button>
+            <button class="btn btn-primary" onclick="navAlert('Opens a support copilot grounded on loan-origination@v1.3 + credit-policy@v1.4 + kyc-policy@v2.1 — answers ops staff queries in real time')">🤖 Open Support Copilot</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div class="card">
+              <div class="card-title">Standard Operating Procedure · Loan Origination</div>
+              <div style="font-size:11px;color:var(--dim);margin-bottom:12px;">Generated from loan-origination@v1.3 · credit-policy@v1.4 · kyc-policy@v2.1 · 2026-05-12</div>
+
+              <div class="sop-step">
+                <div class="sop-num">1</div>
+                <div class="sop-text">
+                  <strong>Receive application</strong>
+                  Applications arrive via the loan-origination channel. Do not intervene unless the orchestrator agent assigns a case to your HITL queue.
+                </div>
+              </div>
+              <div class="sop-step">
+                <div class="sop-num">2</div>
+                <div class="sop-text">
+                  <strong>Monitor the channel</strong>
+                  The agent handles steps 1–3 automatically — identity verify, bureau pull, AA fetch. Your work begins only when a case arrives in My Queue.
+                </div>
+              </div>
+              <div class="sop-step">
+                <div class="sop-num">3</div>
+                <div class="sop-text">
+                  <strong>Review the agent's handoff note</strong>
+                  Read the reasoning, not just the recommendation. The evidence cards (left: agent data, right: source docs) are side-by-side. Do not redo the bureau pull — the agent's data is fresh.
+                </div>
+              </div>
+              <div class="sop-step">
+                <div class="sop-num">4</div>
+                <div class="sop-text">
+                  <strong>Make your decision: Resume, Re-scan, or Decline</strong>
+                  Resume → you agree with the agent's assessment. Re-scan → you suspect a data error (agent re-runs steps 2–3). Decline → case does not meet policy.
+                </div>
+              </div>
+              <div class="sop-step">
+                <div class="sop-num">5</div>
+                <div class="sop-text">
+                  <strong>Document your rationale — be specific</strong>
+                  Your rationale is written to team institutional memory. Future agents read it. "Kothrud → Hadapsar, 8 km intra-city, visual OCR confirmed" is useful. "Approved" is not.
+                </div>
+              </div>
+              <div class="sop-step">
+                <div class="sop-num">6</div>
+                <div class="sop-text">
+                  <strong>Booking confirmation</strong>
+                  After your approval the agent completes the Finacle booking event. The loan ID appears in the channel within 60 seconds. No further action required from you.
+                </div>
+              </div>
+
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;margin-top:4px;">
+                <div style="font-weight:600;margin-bottom:5px;">Key thresholds</div>
+                <div style="color:var(--mute);line-height:1.8;">
+                  · Loan &gt; ₹25 L → always UW queue, even if no flags<br>
+                  · CIBIL &lt; 650 → CRO escalation (not UW)<br>
+                  · CIBIL &lt; 620 → auto-decline, no override possible<br>
+                  · ≥ 2 amber flags → HITL required (§4.2)<br>
+                  · Addr mismatch ≤ 25 km → approvable with haircut (§8.1)
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Escalation paths</div>
+              <div class="esc-card" style="background:#FEF8EC;border:1px solid #F5D5A5;">
+                <span style="font-size:18px;">⚠</span>
+                <div style="font-size:11px;">
+                  <div style="font-weight:600;color:var(--amber);">Sr. Underwriter queue</div>
+                  <div style="color:var(--mute);margin-top:2px;">≥ 2 amber flags · Loan ₹10–25 L · intra-city addr mismatch · OCR &lt; 80%</div>
+                </div>
+              </div>
+              <div class="esc-card" style="background:#FEF0EB;border:1px solid #F5C4B5;">
+                <span style="font-size:18px;">🔴</span>
+                <div style="font-size:11px;">
+                  <div style="font-weight:600;color:var(--coral);">CRO queue</div>
+                  <div style="color:var(--mute);margin-top:2px;">CIBIL &lt; 650 · loan-stacking detected · Loan &gt; ₹25 L · inter-city addr mismatch</div>
+                </div>
+              </div>
+              <div class="esc-card" style="background:var(--bg);border:1px solid var(--border);">
+                <span style="font-size:18px;">⛔</span>
+                <div style="font-size:11px;">
+                  <div style="font-weight:600;">Auto-decline (kernel · no override)</div>
+                  <div style="color:var(--mute);margin-top:2px;">CIBIL &lt; 620. Kernel decision is final. Raise a compliance query if you believe the rule is wrong — do not attempt to re-route.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">Frequently asked questions · ops staff</div>
+
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> Why is the application stuck in my queue?</div>
+                <div class="faq-a">The agent paused because two or more amber flags were raised (credit-policy §4.2). It needs a human judgment call outside automatic approval bounds. The agent's reasoning and recommendation are in the handoff note — start there, not with the raw application.</div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> Can I override a kernel-based auto-decline?</div>
+                <div class="faq-a">No. Kernel rules KR-LO-006 and below are deterministic by design. If CIBIL &lt; 620, the process cannot proceed regardless of other factors. This is a hard RBI compliance boundary. Contact the credit risk team if you believe the rule needs revision — that goes through the policy amendment workflow, not a case override.</div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> The Aadhaar address does not match. What do I do?</div>
+                <div class="faq-a">Check the distance. If ≤ 25 km (intra-city), you can approve under §8.1 with a standard haircut. Document the distance and your visual confirmation in your rationale. If &gt; 25 km, escalate to CRO — this falls outside sr. underwriter authority.</div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> What happens to my HITL rationale after I submit?</div>
+                <div class="faq-a">It is written to team-uw/hitl-log/ under your user ID, timestamped and version-pinned. It becomes part of team institutional memory — future agents read it when handling similar cases. It is also pinned in the decision log and is fully audit-visible.</div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> The bureau score looks wrong. Can the agent re-run it?</div>
+                <div class="faq-a">Click "Re-scan" in your HITL queue. This re-runs steps 2–3 with fresh connector calls. Do not click Resume if you suspect a data error. The Re-scan path is specifically designed to handle stale or incorrect connector responses without creating a compliance gap.</div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-q"><span class="faq-q-marker">Q</span> The customer says their AA statement is missing an account. What do I do?</div>
+                <div class="faq-a">Ask the customer to check their AA consent status on their banking app. If they can add the missing account and refresh consent, click Re-scan — the agent will re-fetch. If they cannot, request alternative bank statements manually and use the manual-docs exception path documented in §7.2 of the SOP.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /tab-support -->
+
+
+      <!-- ======================================================
+           TAB: TRAIN
+      ====================================================== -->
+      <div class="tab-content" id="tab-train">
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px;">Train · loan-origination</div>
+            <div style="font-size:11px;color:var(--mute);">Scenario-based training grounded in the live ProcessSkill. New hires run the same cases the agents handle, scored on alignment with policy intent. Certification automatically updates when the ProcessSkill version changes.</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button class="btn btn-secondary" onclick="navAlert('Full certification roster — all staff, all ProcessSkills, pass/fail history')">Certification roster</button>
+            <button class="btn btn-primary" onclick="navAlert('Opens interactive training session — trainee works through scenarios, receives scored feedback grounded in the live PolicySkill')">▶ Start Training Session</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 268px;gap:12px;">
+          <div>
+
+            <!-- Scenario list -->
+            <div class="card" style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div class="card-title" style="margin:0;">Training scenarios · loan-origination@v1.3</div>
+                <div style="font-size:11px;color:var(--dim);">3 scenarios · updated 2026-05-10</div>
+              </div>
+
+              <div class="scenario-card sel" onclick="selectScenario(this,'s1')">
+                <div class="sc-header">
+                  <div class="sc-title">Scenario 1 · Intra-city address mismatch</div>
+                  <div class="diff-pill diff-easy">Easy</div>
+                </div>
+                <div class="sc-desc">MSME WC ₹14 L · CIBIL 715 · AA connected · clean financials. Aadhaar shows Kothrud, application shows Hadapsar (8 km). Shop cert OCR 76%. The agent has paused. What do you do?</div>
+                <div class="sc-footer">
+                  <span style="font-size:10px;color:var(--mute);">Policy: §4.2, §8.1</span>
+                  <span style="margin-left:auto;font-size:10px;color:var(--teal);font-weight:500;">4.8 / 5 avg · 127 attempts</span>
+                </div>
+              </div>
+
+              <div class="scenario-card" onclick="selectScenario(this,'s2')">
+                <div class="sc-header">
+                  <div class="sc-title">Scenario 2 · Loan-stacking signal</div>
+                  <div class="diff-pill diff-med">Medium</div>
+                </div>
+                <div class="sc-desc">₹22 L application · CIBIL 685 · fraud agent flagged 3 active external loans (₹31 L total, not declared). Case is in CRO queue. Customer claims one loan was for a family member. What evidence do you need? What is your decision?</div>
+                <div class="sc-footer">
+                  <span style="font-size:10px;color:var(--mute);">Policy: §5.3, §7.1, §9.2</span>
+                  <span style="margin-left:auto;font-size:10px;color:var(--amber);font-weight:500;">3.6 / 5 avg · 89 attempts</span>
+                </div>
+              </div>
+
+              <div class="scenario-card" onclick="selectScenario(this,'s3')">
+                <div class="sc-header">
+                  <div class="sc-title">Scenario 3 · Cooperative bank thin-file</div>
+                  <div class="diff-pill diff-hard">Hard</div>
+                </div>
+                <div class="sc-desc">₹18 L application · CIBIL 632 (thin file — cooperative bank primary) · AA shows strong cash flows ₹6.2 L/mo · DSCR 1.6×. Agent escalated citing §4.2 near-floor + §6.1 thin file. Team memory has a known-issues note on cooperative bank under-reporting. Approve, decline, or more info?</div>
+                <div class="sc-footer">
+                  <span style="font-size:10px;color:var(--mute);">Policy: §4.2, §6.1, §8.3 + team memory</span>
+                  <span style="margin-left:auto;font-size:10px;color:var(--coral);font-weight:500;">2.9 / 5 avg · 61 attempts</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active scenario -->
+            <div class="card" id="scenario-detail">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;" id="scenario-title">Scenario 1 · Active</div>
+              <div style="font-size:11px;color:var(--mute);margin-bottom:10px;" id="scenario-prompt">
+                Review the agent's handoff note below and choose the action you would take as the assigned senior underwriter.
+              </div>
+
+              <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;font-size:11px;" id="scenario-handoff">
+                <div style="font-weight:600;margin-bottom:5px;">Agent handoff note · app_T001</div>
+                <div style="color:var(--mute);line-height:1.6;">
+                  MSME WC ₹14 L. CIBIL 715 ✓. AA connected — 18 mo statements, avg ₹3.8 L/mo, DSCR 1.3× ✓. Issue 1: Aadhaar addr Kothrud, application addr Hadapsar, 8 km distance. Issue 2: Shop establishment certificate OCR 74% — address field partially illegible. Two amber flags → §4.2 threshold → HITL required. <strong>My recommendation: Approve at ₹12.5 L (11% haircut per §8.1) subject to visual OCR confirmation.</strong>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                <button class="btn btn-teal" onclick="scoreTraining('approve_haircut')">✓ Approve with haircut (₹12.5 L)</button>
+                <button class="btn btn-secondary" onclick="scoreTraining('approve_full')">Approve full ₹14 L</button>
+                <button class="btn btn-secondary" onclick="scoreTraining('rescan')">Re-scan / request more docs</button>
+                <button class="btn btn-outline" onclick="scoreTraining('decline')">Decline</button>
+              </div>
+
+              <div id="training-feedback" style="display:none;padding:10px;border-radius:6px;font-size:11px;"></div>
+            </div>
+
+          </div>
+
+          <!-- Right: certification -->
+          <div>
+            <div class="card">
+              <div class="card-title">Team certification · loan-origination@v1.3</div>
+              <div style="font-size:11px;color:var(--mute);margin-bottom:8px;">12 staff eligible for this ProcessSkill</div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+                <div style="font-size:24px;font-weight:700;font-family:var(--mono);">4</div>
+                <div style="font-size:13px;color:var(--mute);">/ 12 certified</div>
+              </div>
+              <div class="cert-bar" style="margin-bottom:4px;"><div class="cert-fill" style="width:33%;"></div></div>
+              <div style="font-size:10px;color:var(--mute);margin-bottom:12px;">8 pending · 2 in progress</div>
+
+              <div class="cert-staff"><span>Priya Sharma</span><span style="color:var(--teal);font-size:11px;">✓ Certified</span></div>
+              <div class="cert-staff"><span>Anand Kumar</span><span style="color:var(--teal);font-size:11px;">✓ Certified</span></div>
+              <div class="cert-staff"><span>Deepa Nair</span><span style="color:var(--teal);font-size:11px;">✓ Certified</span></div>
+              <div class="cert-staff"><span>Suresh Iyer</span><span style="color:var(--teal);font-size:11px;">✓ Certified</span></div>
+              <div class="cert-staff"><span>Meena Rao</span><span style="color:var(--amber);font-size:11px;">● In progress</span></div>
+              <div class="cert-staff"><span>Ranjit Singh</span><span style="color:var(--amber);font-size:11px;">● In progress</span></div>
+              <div class="cert-staff" style="color:var(--dim);font-size:10px;"><span>+ 6 more not started</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Common mistakes · from training data</div>
+              <div style="font-size:11px;color:var(--mute);">
+                <div style="padding:6px 0;border-bottom:1px solid var(--border);">
+                  <div style="font-weight:600;color:var(--fg);margin-bottom:2px;">Approving full amount on addr mismatch</div>
+                  §8.1 requires a haircut when Aadhaar addr ≠ application addr, even if the distance is within tolerance. 31% of trainees miss this on Scenario 1.
+                </div>
+                <div style="padding:6px 0;border-bottom:1px solid var(--border);">
+                  <div style="font-weight:600;color:var(--fg);margin-bottom:2px;">Declining on CIBIL 632 (thin file)</div>
+                  AA data is co-equal evidence under §8.3. Cooperative bank thin-file ≠ auto-decline. DSCR 1.6× overrides near-floor bureau. 44% wrong on Scenario 3.
+                </div>
+                <div style="padding:6px 0;">
+                  <div style="font-weight:600;color:var(--fg);margin-bottom:2px;">Submitting vague HITL rationale</div>
+                  Generic entries ("approved") are flagged by audit review. Rationale must name the specific policy section and the specific evidence reviewed. Seen in 22% of submissions.
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Certification versioning</div>
+              <div style="font-size:11px;color:var(--mute);line-height:1.6;">
+                When loan-origination bumps to v1.4, all certifications for v1.3 are marked stale. Staff receive a re-certification prompt. Re-cert covers only the delta — staff do not repeat scenarios unaffected by the version change.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-train -->
+
+    </div><!-- /content -->
+
+
+    <!-- ===== RIGHT METADATA PANEL ===== -->
+    <div class="right-panel">
+
+      <div class="rp-section">
+        <div class="rp-label">Version history</div>
+        <div class="v-pills">
+          <div class="v-pill head">v1.3</div>
+          <div class="v-pill" onclick="navAlert('v1.2 diff: added KR-LO-009 loan-stacking rule; tightened bureau floor to 620')">v1.2</div>
+          <div class="v-pill" onclick="navAlert('v1.1 diff: AA connector added; §8.1 intra-city exception introduced')">v1.1</div>
+          <div class="v-pill" onclick="navAlert('v1.0: initial release')">v1.0</div>
+        </div>
+        <div class="rp-row" style="margin-top:8px;"><span class="rp-key">First authored</span><span class="rp-val">2026-03-12</span></div>
+        <div class="rp-row"><span class="rp-key">Last modified</span><span class="rp-val">2026-05-01</span></div>
+        <div class="rp-row"><span class="rp-key">Modified by</span><span class="rp-val">Reena K.</span></div>
+        <div class="rp-row"><span class="rp-key">sha256 (head)</span><span class="rp-val">c1f9d4…</span></div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label">Policy dependencies</div>
+        <div style="font-size:11px;">
+          <div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--purple);">credit-policy</span><span class="rp-val">v1.4 ✓</span>
+          </div>
+          <div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--purple);">kyc-policy</span><span class="rp-val">v2.1 ✓</span>
+          </div>
+          <div style="padding:5px 0;display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:var(--purple);">fair-practices</span><span class="rp-val">v1.1 ✓</span>
+          </div>
+        </div>
+        <div style="margin-top:6px;font-size:10px;color:var(--teal);">All dependencies current ✓</div>
+        <div style="margin-top:4px;font-size:10px;color:var(--amber);">⚠ credit-policy v1.5 draft in review — run Test tab to assess impact</div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label">Connector bindings</div>
+        <div class="conn-row"><span>CIBIL / Experian</span><span class="conn-live">● Live</span></div>
+        <div class="conn-row"><span>Account Aggregator</span><span class="conn-live">● Live</span></div>
+        <div class="conn-row"><span>CKYC</span><span class="conn-live">● Live</span></div>
+        <div class="conn-row"><span>Finacle Core</span><span class="conn-live">● Live</span></div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label">ProcessArtifacts produced</div>
+        <div style="font-size:11px;color:var(--mute);">
+          <div style="padding:4px 0;border-bottom:1px solid var(--border);">DecisionLog <span style="font-size:10px;">(immutable, per case)</span></div>
+          <div style="padding:4px 0;border-bottom:1px solid var(--border);">AuditPack <span style="font-size:10px;">(on-demand, Audit tab)</span></div>
+          <div style="padding:4px 0;border-bottom:1px solid var(--border);">SOP <span style="font-size:10px;">(auto-generated, Support tab)</span></div>
+          <div style="padding:4px 0;border-bottom:1px solid var(--border);">FAQ <span style="font-size:10px;">(auto-generated, Support tab)</span></div>
+          <div style="padding:4px 0;border-bottom:1px solid var(--border);">TrainingScenarios <span style="font-size:10px;">(managed, Train tab)</span></div>
+          <div style="padding:4px 0;">ImpactReport <span style="font-size:10px;">(on-demand, Test tab)</span></div>
+        </div>
+      </div>
+
+      <div class="rp-section">
+        <div class="rp-label">Recent activity</div>
+        <div class="act-item">
+          <div class="act-ts">2026-05-12 · 11:42</div>
+          <div>47 executions today · 3 paused HITL</div>
+        </div>
+        <div class="act-item">
+          <div class="act-ts">2026-05-11 · 08:15</div>
+          <div>credit-policy v1.5 draft flagged for impact review</div>
+        </div>
+        <div class="act-item">
+          <div class="act-ts">2026-05-10 · 02:14</div>
+          <div>Dreams run: 2 memory updates approved by CRO</div>
+        </div>
+        <div class="act-item">
+          <div class="act-ts">2026-05-01</div>
+          <div>v1.3 deployed — KR-LO-009 loan-stacking rule added</div>
+        </div>
+        <div class="act-item">
+          <div class="act-ts">2026-04-15</div>
+          <div>credit-policy@v1.4 pinned (was v1.3)</div>
+        </div>
+      </div>
+
+    </div><!-- /right-panel -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+  /* ===== TAB SWITCHING ===== */
+  function switchTab(name) {
+    document.querySelectorAll('.mode-tab').forEach(t =>
+      t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tab-content').forEach(c =>
+      c.classList.toggle('active', c.id === 'tab-' + name));
+  }
+
+  /* ===== SUB-TAB SWITCHING (Test) ===== */
+  function switchSubTab(name) {
+    const tabs = document.querySelectorAll('#testSubTabs .sub-tab');
+    const names = ['case-runner', 'policy-impact'];
+    tabs.forEach((t, i) => t.classList.toggle('active', names[i] === name));
+    document.getElementById('sub-case-runner').style.display  = name === 'case-runner'    ? '' : 'none';
+    document.getElementById('sub-policy-impact').style.display = name === 'policy-impact' ? '' : 'none';
+  }
+
+  /* ===== SCENARIO SELECTION (Train) ===== */
+  const scenarios = {
+    s1: {
+      title: 'Scenario 1 · Intra-city address mismatch',
+      prompt: 'Review the agent's handoff note below and choose the action you would take as the assigned senior underwriter.',
+      handoff: '<div style="font-weight:600;margin-bottom:5px;">Agent handoff note · app_T001</div><div style="color:var(--mute);line-height:1.6;">MSME WC ₹14 L. CIBIL 715 ✓. AA connected — 18 mo statements, avg ₹3.8 L/mo, DSCR 1.3× ✓. Issue 1: Aadhaar addr Kothrud, application addr Hadapsar, 8 km distance. Issue 2: Shop establishment certificate OCR 74% — address field partially illegible. Two amber flags → §4.2 threshold → HITL required. <strong>My recommendation: Approve at ₹12.5 L (11% haircut per §8.1) subject to visual OCR confirmation.</strong></div>'
+    },
+    s2: {
+      title: 'Scenario 2 · Loan-stacking signal',
+      prompt: 'You are in the CRO queue. Review the agent's escalation note and decide how to proceed.',
+      handoff: '<div style="font-weight:600;margin-bottom:5px;">Agent escalation note · app_T002</div><div style="color:var(--mute);line-height:1.6;">MSME WC ₹22 L. CIBIL 685, above floor. Bureau cross-check detected 3 active loans at other lenders totaling ₹31 L — not declared on application. Loan-stacking flag raised (§5.3). Customer claims one loan (₹12 L) was taken for a family member\'s business. AA shows ₹8.4 L/mo turnover — cash flows could support both books if the family loan is genuine. <strong>I cannot verify the family claim without additional evidence. Escalating to CRO.</strong></div>'
+    },
+    s3: {
+      title: 'Scenario 3 · Cooperative bank thin-file',
+      prompt: 'You are in the senior underwriter queue. The case is complex — read both the agent's note and the team memory entry before deciding.',
+      handoff: '<div style="font-weight:600;margin-bottom:5px;">Agent escalation note · app_T003</div><div style="color:var(--mute);line-height:1.6;">MSME WC ₹18 L. CIBIL 632 — thin file (2 accounts, cooperative bank primary). §4.2 near-floor flag. AA shows avg ₹6.2 L/mo turnover, DSCR 1.6× — strong cash flows. §6.1 thin-file flag also raised. I read <em>team-uw/known-issues/cooperative-bank-credits.md</em>: "CIBIL under-represents cooperative bank customers; AA data is co-equal evidence under §8.3." <strong>I believe this case can be approved under §8.3 but the thin-file flag requires HITL confirmation.</strong></div>'
+    }
+  };
+
+  function selectScenario(el, id) {
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('sel'));
+    el.classList.add('sel');
+    const s = scenarios[id];
+    document.getElementById('scenario-title').textContent  = s.title + ' · Active';
+    document.getElementById('scenario-prompt').textContent = s.prompt;
+    document.getElementById('scenario-handoff').innerHTML  = s.handoff;
+    document.getElementById('training-feedback').style.display = 'none';
+  }
+
+  /* ===== TRAINING SCORING (Scenario 1 defaults) ===== */
+  function scoreTraining(action) {
+    const fb = document.getElementById('training-feedback');
+    fb.style.display = 'block';
+    const r = {
+      approve_haircut: {
+        bg:'#E8F8F2', br:'#B5E8D5',
+        icon:'✓', score:'5 / 5',
+        title:'Correct',
+        body:'Approved at ₹12.5 L with haircut. §8.1 permits intra-city addr mismatch ≤ 25 km with a standard haircut. OCR confirmation on visual is sufficient to proceed. Your rationale should document "Kothrud → Hadapsar, 8 km, visual OCR confirmed."'
+      },
+      approve_full: {
+        bg:'#FEF8EC', br:'#F5D5A5',
+        icon:'△', score:'2 / 5',
+        title:'Partial',
+        body:'Direction is correct — approve — but §8.1 requires a haircut when Aadhaar addr differs from application addr, even within the 25 km intra-city tolerance. Approving the full ₹14 L without haircut is a policy deviation. Re-read §8.1.'
+      },
+      rescan: {
+        bg:'#FEF8EC', br:'#F5D5A5',
+        icon:'△', score:'3 / 5',
+        title:'Acceptable but suboptimal',
+        body:'Re-scanning is valid if you distrust the data. Here, CIBIL 715 and AA are solid — the only weak signal is OCR on the shop cert, which visual review resolves without a connector re-call. Re-scanning adds 90+ seconds delay and a redundant bureau hit. Prefer Resume after visual confirmation.'
+      },
+      decline: {
+        bg:'#FEF0EB', br:'#F5C4B5',
+        icon:'✗', score:'0 / 5',
+        title:'Incorrect',
+        body:'Declining is not supported by policy. CIBIL 715 is above all floors. AA shows healthy cash flows. The addr mismatch is intra-city (§8.1 approvable) and OCR resolves on visual. A decline here would be a policy violation and could be challenged at the ombudsman. §8.1 was specifically designed for this case type.'
+      }
+    }[action];
+    fb.style.cssText += `;background:${r.bg};border:1px solid ${r.br};border-radius:6px;`;
+    fb.innerHTML = `<div style="font-weight:600;margin-bottom:3px;">${r.icon} ${r.title} · ${r.score}</div><div style="color:var(--mute);">${r.body}</div>`;
+  }
+
+  /* ===== NAV ALERT ===== */
+  function navAlert(msg) { alert(msg); }
+</script>
+
+</body>
+</html>
