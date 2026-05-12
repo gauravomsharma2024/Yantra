@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CredMitra · loan-origination — pipeline cockpit</title>
+<style>
+  :root {
+    --amber-50:#FAEEDA;  --amber-100:#FAC775;  --amber-600:#BA7517; --amber-800:#633806;
+    --teal-50:#E1F5EE;   --teal-100:#C0DD97;   --teal-600:#1D9E75;  --teal-800:#085041;
+    --coral-50:#FAECE7;  --coral-100:#F5C4B3;  --coral-600:#D85A30; --coral-800:#712B13;
+    --red-50:#FCEBEB;    --red-100:#F7C1C1;    --red-600:#E24B4A;   --red-800:#791F1F;
+    --gray-50:#F8F7F2;   --gray-100:#F1EFE8;   --gray-200:#E5E2D8;
+    --gray-300:#D3D1C7;  --gray-500:#8F8D86;   --gray-600:#5F5E5A;  --gray-800:#2C2C2A;
+    --purple-600:#7F77DD;
+    --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; background: var(--gray-50); }
+  body {
+    font-family: var(--sans); font-size: 13px; line-height: 1.45;
+    color: var(--gray-800);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ===== Header ===== */
+  .hdr {
+    background: #fff; border-bottom: 1px solid var(--gray-200);
+    padding: 12px 22px;
+  }
+  .hdr-row1 {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .brand {
+    font-weight: 600; font-size: 15px; color: var(--gray-800);
+    border-right: 1px solid var(--gray-200); padding-right: 14px;
+  }
+  .crumb { font-size: 13px; color: var(--gray-600); }
+  .crumb b { color: var(--gray-800); font-weight: 600; }
+  .crumb .sep { color: var(--gray-300); margin: 0 6px; }
+  .live {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-left: auto; font-size: 11.5px; color: var(--gray-600);
+  }
+  .live::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--coral-600); animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .who { font-size: 11.5px; color: var(--gray-600); }
+  .who b { color: var(--gray-800); }
+
+  .kpis {
+    display: flex; gap: 24px; margin-top: 12px;
+    padding-top: 10px; border-top: 1px dashed var(--gray-200);
+  }
+  .kpi { display: flex; flex-direction: column; gap: 1px; }
+  .kpi .v { font-size: 16px; font-weight: 600; color: var(--gray-800); font-family: var(--mono); }
+  .kpi .l { font-size: 10px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.7px; }
+  .kpi.amber .v { color: var(--amber-800); }
+  .kpi.red .v { color: var(--red-800); }
+  .kpi.teal .v { color: var(--teal-800); }
+
+  /* ===== Board ===== */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(240px, 1fr));
+    gap: 12px;
+    padding: 14px 18px;
+    flex: 1; overflow: hidden;
+  }
+  .col {
+    display: flex; flex-direction: column;
+    background: #fff; border: 1px solid var(--gray-200); border-radius: 8px;
+    overflow: hidden;
+  }
+  .col-head {
+    padding: 10px 14px; border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .col-head .icon {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .col-head .name {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--gray-800);
+  }
+  .col-head .count {
+    margin-left: auto; font-size: 11px; font-family: var(--mono);
+    color: var(--gray-600); background: #fff; padding: 1px 8px;
+    border-radius: 10px; border: 1px solid var(--gray-200);
+  }
+  .col-head .agent-bind {
+    font-size: 10px; color: var(--gray-500); font-family: var(--mono);
+  }
+
+  .col-body {
+    flex: 1; overflow-y: auto; padding: 10px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  /* lane-specific accents */
+  .col.intake .icon { background: var(--gray-300); }
+  .col.uw .icon { background: var(--coral-600); }
+  .col.fraud .icon { background: var(--teal-600); }
+  .col.hitl .icon { background: var(--amber-600); }
+  .col.decided .icon { background: var(--gray-500); }
+
+  .col.hitl { border-color: var(--amber-100); }
+  .col.hitl .col-head { background: var(--amber-50); }
+
+  /* ===== Card ===== */
+  .card {
+    border: 1px solid var(--gray-200); border-radius: 6px;
+    padding: 10px 11px; background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    cursor: pointer; transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .card.paused { background: var(--amber-50); border-color: var(--amber-100); }
+  .card.escalated { background: var(--red-50); border-color: var(--red-100); }
+  .card.live { border-color: var(--coral-100); }
+  .card.done { background: var(--teal-50); border-color: var(--teal-100); }
+
+  .c-head {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+  }
+  .sev { width: 6px; height: 6px; border-radius: 50%; }
+  .sev.p1 { background: var(--red-600); }
+  .sev.p2 { background: var(--amber-600); }
+  .sev.p3 { background: var(--gray-500); }
+  .wid { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--gray-800); }
+  .ts { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--gray-500); }
+  .desc {
+    font-size: 11.5px; color: var(--gray-600); line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .amt {
+    font-family: var(--mono); font-weight: 600; color: var(--gray-800);
+  }
+
+  /* mini agent row inside card */
+  .a-mini {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 0; font-size: 11px; color: var(--gray-600);
+    border-top: 1px dashed var(--gray-200);
+  }
+  .a-mini:first-of-type { border-top: 0; }
+  .sw {
+    width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0;
+  }
+  .sw.coral { background: var(--coral-600); }
+  .sw.teal { background: var(--teal-600); }
+  .sw.purple { background: var(--purple-600); }
+  .a-mini .nm { font-family: var(--mono); font-size: 11px; color: var(--gray-800); }
+  .a-mini .steps {
+    display: inline-flex; gap: 2px; margin-left: auto;
+  }
+  .a-mini .steps i {
+    width: 6px; height: 6px; background: var(--gray-200); display: block; border-radius: 1px;
+  }
+  .a-mini .steps i.coral { background: var(--coral-600); }
+  .a-mini .steps i.teal { background: var(--teal-600); }
+  .a-mini .steps i.amber { background: var(--amber-100); border: 1px solid var(--amber-600); box-sizing: border-box; }
+  .a-mini .steps i.red { background: var(--red-600); }
+
+  .pill {
+    display: inline-block; font-size: 9px; font-weight: 600;
+    padding: 1px 6px; border-radius: 8px; letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .pill.hitl { background: var(--amber-100); color: var(--amber-800); }
+  .pill.esc { background: var(--red-100); color: var(--red-800); }
+  .pill.done { background: var(--teal-100); color: var(--teal-800); }
+  .pill.live { background: var(--coral-100); color: var(--coral-800); }
+  .pill.p1 { background: var(--red-50); color: var(--red-800); border: 1px solid var(--red-100); }
+  .pill.p2 { background: var(--amber-50); color: var(--amber-800); border: 1px solid var(--amber-100); }
+  .pill.p3 { background: var(--teal-50); color: var(--teal-800); border: 1px solid var(--teal-100); }
+
+  /* HITL extras */
+  .hitl-rec {
+    margin-top: 6px; padding: 6px 8px;
+    background: #fff; border: 1px solid var(--amber-100);
+    border-radius: 4px; font-size: 11px; line-height: 1.4;
+    color: var(--gray-800);
+  }
+  .hitl-rec b { color: var(--amber-800); font-weight: 600; }
+  .hitl-actions {
+    display: flex; gap: 4px; margin-top: 6px;
+  }
+  .btn {
+    flex: 1; padding: 5px 0; font-size: 10.5px; font-weight: 600;
+    border-radius: 4px; text-align: center; cursor: pointer;
+    font-family: var(--sans);
+  }
+  .btn.primary { background: var(--teal-50); color: var(--teal-800); border: 1px solid var(--teal-100); }
+  .btn.secondary { background: #fff; color: var(--gray-800); border: 1px solid var(--gray-200); }
+  .btn.danger { background: #fff; color: var(--red-800); border: 1px solid var(--red-100); }
+  .btn:hover.primary { background: var(--teal-100); }
+
+  /* trace mini */
+  .trace-mini {
+    margin-top: 6px; font-family: var(--mono); font-size: 10px;
+    color: var(--gray-600); line-height: 1.5;
+  }
+  .trace-mini .l {
+    display: flex; gap: 6px; align-items: baseline;
+  }
+  .trace-mini .op { font-weight: 600; min-width: 38px; }
+  .trace-mini .op.READ { color: var(--teal-800); }
+  .trace-mini .op.WROTE { color: var(--coral-800); }
+  .trace-mini .op.RAN { color: var(--gray-800); }
+  .tag {
+    font-size: 9.5px; padding: 0 4px; border-radius: 2px;
+  }
+  .tag.org { background: var(--amber-50); color: var(--amber-800); }
+  .tag.team { background: var(--teal-50); color: var(--teal-800); }
+  .tag.sess { background: var(--coral-50); color: var(--coral-800); }
+  .tag.bureau { background: var(--amber-50); color: var(--amber-800); }
+
+  /* ===== Footer rail (memory + dreams summary) ===== */
+  .footer {
+    background: #fff; border-top: 1px solid var(--gray-200);
+    padding: 10px 18px;
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+  }
+  .foot-block h5 {
+    margin: 0 0 6px; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--gray-600); font-weight: 600;
+  }
+  .mem-row {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .mem-chip {
+    border: 1px solid var(--gray-200); border-radius: 4px;
+    padding: 4px 8px; font-size: 11px; display: flex; align-items: center; gap: 6px;
+    background: #fff;
+  }
+  .mem-chip.writing { background: var(--teal-50); border-color: var(--teal-100); }
+  .mem-chip .nm { font-weight: 500; }
+  .mem-chip .v { font-family: var(--mono); font-size: 10px; color: var(--gray-600); }
+  .mem-chip .perm {
+    font-size: 8.5px; padding: 0 4px; border-radius: 6px;
+    font-weight: 600; letter-spacing: 0.4px;
+  }
+  .mem-chip .perm.ro { background: var(--amber-100); color: var(--amber-800); }
+  .mem-chip .perm.rw { background: var(--teal-100); color: var(--teal-800); }
+
+  .dream-foot {
+    border: 1px solid var(--gray-200); border-radius: 6px; padding: 8px 10px;
+    background: linear-gradient(135deg, #F6F4FB 0%, #ECE7F7 100%);
+    font-size: 11.5px; line-height: 1.45; color: var(--gray-800);
+  }
+  .dream-foot b { color: #4A3F6B; font-weight: 600; }
+  .dream-foot .cta { color: #6356B0; cursor: pointer; text-decoration: underline; font-size: 11px; }
+
+  /* live pulse on running agent steps */
+  .pulse { animation: pulse 1.4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <div class="hdr-row1">
+      <div class="brand">CredMitra</div>
+      <div class="crumb">
+        Operate <span class="sep">›</span>
+        <b>loan-origination</b>
+        <span class="sep">·</span>
+        pipeline view
+      </div>
+      <div class="live">live</div>
+      <div class="who" style="margin-left:14px">
+        <b>priya.k</b> · senior underwriter · Pune
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span class="v">71</span><span class="l">apps today</span></div>
+      <div class="kpi teal"><span class="v">71%</span><span class="l">auto-decided</span></div>
+      <div class="kpi amber"><span class="v">14</span><span class="l">HITL load</span></div>
+      <div class="kpi red"><span class="v">3</span><span class="l">escalations</span></div>
+      <div class="kpi"><span class="v">3m 41s</span><span class="l">p50 cycle</span></div>
+      <div class="kpi"><span class="v">11m 02s</span><span class="l">p95 cycle</span></div>
+      <div class="kpi"><span class="v">4.2/min</span><span class="l">memory writes</span></div>
+      <div class="kpi"><span class="v">₹2.41L</span><span class="l">token spend</span></div>
+    </div>
+  </header>
+
+  <!-- ============ BOARD ============ -->
+  <section class="board">
+
+    <!-- =========== INTAKE =========== -->
+    <div class="col intake">
+      <div class="col-head">
+        <span class="icon"></span>
+        <span class="name">Intake</span>
+        <span class="agent-bind">orchestrator-α</span>
+        <span class="count">2</span>
+      </div>
+      <div class="col-body">
+
+        <div class="card">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8826</span>
+            <span class="pill p3">P3</span>
+            <span class="ts">just now</span>
+          </div>
+          <div class="desc">Nashik · packaging · <span class="amt">₹6,50,000</span> · 24m</div>
+          <div class="a-mini">
+            <span class="sw purple"></span>
+            <span class="nm">orchestrator-α</span>
+            <span style="color:var(--gray-600); font-family:var(--mono); font-size:10px">routing…</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="c-head">
+            <span class="sev p2"></span>
+            <span class="wid">app_8827</span>
+            <span class="pill p2">P2</span>
+            <span class="ts">22s</span>
+          </div>
+          <div class="desc">Ludhiana · hosiery · <span class="amt">₹14,00,000</span> · 36m</div>
+          <div class="a-mini">
+            <span class="sw purple"></span>
+            <span class="nm">orchestrator-α</span>
+            <span style="color:var(--gray-600); font-family:var(--mono); font-size:10px">spawning siblings…</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========== UNDERWRITING =========== -->
+    <div class="col uw">
+      <div class="col-head">
+        <span class="icon"></span>
+        <span class="name">Underwriting</span>
+        <span class="agent-bind">uw-agent · coral</span>
+        <span class="count">2</span>
+      </div>
+      <div class="col-body">
+
+        <div class="card live">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8825</span>
+            <span class="pill live">step 3/6</span>
+            <span class="ts">1m</span>
+          </div>
+          <div class="desc">Coimbatore · textile mfg · <span class="amt">₹12,00,000</span> · 48m</div>
+          <div class="a-mini">
+            <span class="sw coral"></span>
+            <span class="nm">uw-agent</span>
+            <span style="font-family:var(--mono); font-size:10px; color:var(--gray-600)">…c4e</span>
+            <span class="steps">
+              <i class="coral"></i><i class="coral"></i>
+              <i class="coral pulse"></i><i></i><i></i><i></i>
+            </span>
+          </div>
+          <div class="a-mini">
+            <span class="sw teal"></span>
+            <span class="nm">fraud-agent</span>
+            <span style="font-family:var(--mono); font-size:10px; color:var(--gray-600)">…7a2</span>
+            <span class="steps">
+              <i class="teal"></i><i class="teal"></i><i class="teal"></i><i class="teal"></i><i></i><i></i>
+            </span>
+          </div>
+          <div class="trace-mini">
+            <div class="l"><span class="op READ">READ</span><span class="tag bureau">bureau</span><span>cibil score 781</span></div>
+            <div class="l"><span class="op RAN">RAN</span><span>banking_analyser · in flight</span></div>
+          </div>
+        </div>
+
+        <div class="card live">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8824</span>
+            <span class="pill live">step 5/6</span>
+            <span class="ts">3m</span>
+          </div>
+          <div class="desc">Indore · auto parts · <span class="amt">₹9,50,000</span> · 36m</div>
+          <div class="a-mini">
+            <span class="sw coral"></span>
+            <span class="nm">uw-agent</span>
+            <span class="steps">
+              <i class="coral"></i><i class="coral"></i><i class="coral"></i>
+              <i class="coral"></i><i class="coral pulse"></i><i></i>
+            </span>
+          </div>
+          <div class="a-mini">
+            <span class="sw teal"></span>
+            <span class="nm">fraud-agent</span>
+            <span class="steps">
+              <i class="teal"></i><i class="teal"></i><i class="teal"></i><i class="teal"></i><i class="teal"></i><i></i>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========== FRAUD REVIEW (sibling lane) =========== -->
+    <div class="col fraud">
+      <div class="col-head">
+        <span class="icon"></span>
+        <span class="name">Fraud · sibling</span>
+        <span class="agent-bind">fraud-agent · teal</span>
+        <span class="count">1</span>
+      </div>
+      <div class="col-body">
+
+        <div class="card live">
+          <div class="c-head">
+            <span class="sev p2"></span>
+            <span class="wid">app_8823</span>
+            <span class="pill live">step 2/5</span>
+            <span class="ts">38s</span>
+          </div>
+          <div class="desc">Jaipur · gems · <span class="amt">₹19,00,000</span> · 48m</div>
+          <div class="a-mini">
+            <span class="sw teal"></span>
+            <span class="nm">fraud-agent</span>
+            <span style="font-family:var(--mono); font-size:10px; color:var(--gray-600)">…9bf</span>
+            <span class="steps">
+              <i class="teal"></i><i class="teal pulse"></i><i></i><i></i><i></i><i></i>
+            </span>
+          </div>
+          <div class="trace-mini">
+            <div class="l"><span class="op READ">READ</span><span class="tag team">team-fraud</span><span>velocity-rules v14</span></div>
+            <div class="l"><span class="op RAN">RAN</span><span>stack_check · pending</span></div>
+          </div>
+          <div style="font-size:10.5px; color:var(--gray-600); margin-top:4px">
+            ↓ uw-agent waiting on clear before bureau read
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========== HITL =========== -->
+    <div class="col hitl">
+      <div class="col-head">
+        <span class="icon"></span>
+        <span class="name">HITL · paused</span>
+        <span class="agent-bind">→ priya.k</span>
+        <span class="count">1</span>
+      </div>
+      <div class="col-body">
+
+        <div class="card paused">
+          <div class="c-head">
+            <span class="sev p2"></span>
+            <span class="wid">app_8821</span>
+            <span class="pill hitl">paused</span>
+            <span class="ts">11m</span>
+          </div>
+          <div class="desc">Pune · steel-fab · <span class="amt">₹18,00,000</span> · 36m</div>
+
+          <div class="hitl-rec">
+            <b>uw-agent says:</b> recommend <b>approve @ ₹15L</b> (not 18L). Two ambers — kyc.address.mismatch intra-city, ocr.gst_q3 conf 0.71. Bureau clean. Halted at §4.2 two-amber rule.
+          </div>
+
+          <div class="a-mini">
+            <span class="sw coral"></span>
+            <span class="nm">uw-agent</span>
+            <span class="steps">
+              <i class="coral"></i><i class="coral"></i><i class="coral"></i>
+              <i class="coral"></i><i class="coral"></i><i class="amber"></i>
+            </span>
+          </div>
+          <div class="a-mini">
+            <span class="sw teal"></span>
+            <span class="nm">fraud-agent</span>
+            <span class="pill done" style="font-size:8.5px">cleared</span>
+            <span class="steps">
+              <i class="teal"></i><i class="teal"></i><i class="teal"></i><i class="teal"></i><i class="teal"></i><i></i>
+            </span>
+          </div>
+
+          <div class="hitl-actions">
+            <div class="btn primary">approve ₹15L · resume ↗</div>
+          </div>
+          <div class="hitl-actions">
+            <div class="btn secondary">re-scan ↗</div>
+            <div class="btn danger">decline</div>
+          </div>
+
+          <div style="font-size:10px; color:var(--gray-600); margin-top:6px; line-height:1.4">
+            Decision → <span style="font-family:var(--mono)">team-uw/hitl-log/8821.md</span> · written_by priya.k · dreaming will learn from this
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========== DECIDED =========== -->
+    <div class="col decided">
+      <div class="col-head">
+        <span class="icon"></span>
+        <span class="name">Decided · today</span>
+        <span class="agent-bind">71 closed</span>
+        <span class="count">71</span>
+      </div>
+      <div class="col-body">
+
+        <div class="card escalated">
+          <div class="c-head">
+            <span class="sev p1"></span>
+            <span class="wid">app_8819</span>
+            <span class="pill esc">escalated</span>
+            <span class="ts">35m</span>
+          </div>
+          <div class="desc">Hyderabad · trading · <span class="amt">₹8,00,000</span> · 24m</div>
+          <div style="font-size:11px; color:var(--red-800); margin: 4px 0 6px">
+            Loan-stacking: 4 enquiries / 11d → credit-committee
+          </div>
+          <div class="a-mini">
+            <span class="sw teal"></span>
+            <span class="nm">fraud-agent</span>
+            <span class="steps">
+              <i class="teal"></i><i class="teal"></i><i class="red"></i><i></i><i></i><i></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="card done">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8814</span>
+            <span class="pill done">approved ₹22L</span>
+            <span class="ts">1h 18m</span>
+          </div>
+          <div class="desc">Surat · diamond-polish · <span class="amt">₹22,00,000</span> · 36m</div>
+          <div class="a-mini">
+            <span class="sw coral"></span>
+            <span class="nm">uw-agent</span>
+            <span style="font-family:var(--mono); font-size:10px; color:var(--gray-600)">3m 22s</span>
+            <span class="steps">
+              <i class="coral"></i><i class="coral"></i><i class="coral"></i>
+              <i class="coral"></i><i class="coral"></i><i class="teal"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="card done">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8809</span>
+            <span class="pill done">approved ₹7L</span>
+            <span class="ts">2h 04m</span>
+          </div>
+          <div class="desc">Kolhapur · dairy · <span class="amt">₹7,00,000</span> · 24m</div>
+          <div class="a-mini">
+            <span class="sw coral"></span>
+            <span class="nm">uw-agent</span>
+            <span style="font-family:var(--mono); font-size:10px; color:var(--gray-600)">2m 51s</span>
+            <span class="steps">
+              <i class="coral"></i><i class="coral"></i><i class="coral"></i>
+              <i class="coral"></i><i class="coral"></i><i class="teal"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="c-head">
+            <span class="sev p3"></span>
+            <span class="wid">app_8802</span>
+            <span class="pill done" style="background:var(--gray-200); color:var(--gray-800)">declined</span>
+            <span class="ts">3h 11m</span>
+          </div>
+          <div class="desc">Vadodara · retail · <span class="amt">₹5,00,000</span> · 18m</div>
+          <div style="font-size:10.5px; color:var(--gray-600)">DSCR 0.84 · below threshold</div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="foot-block">
+      <h5>Memory stores · being read by agents now</h5>
+      <div class="mem-row">
+        <div class="mem-chip">
+          <span class="nm">org-policy</span>
+          <span class="v">v3</span>
+          <span class="perm ro">RO</span>
+        </div>
+        <div class="mem-chip">
+          <span class="nm">org-bureau</span>
+          <span class="v">v12</span>
+          <span class="perm ro">RO</span>
+        </div>
+        <div class="mem-chip writing">
+          <span class="nm">team-uw</span>
+          <span class="v">v74 · head</span>
+          <span class="perm rw">RW</span>
+        </div>
+        <div class="mem-chip writing">
+          <span class="nm">team-fraud</span>
+          <span class="v">v41 · head</span>
+          <span class="perm rw">RW</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-block">
+      <h5>Lane health</h5>
+      <div style="display:flex; gap:14px; font-size:11px; color:var(--gray-600)">
+        <span>intake → uw <b style="color:var(--gray-800); font-family:var(--mono)">18s p50</b></span>
+        <span>uw cycle <b style="color:var(--gray-800); font-family:var(--mono)">3m 41s p50</b></span>
+        <span>uw → hitl <b style="color:var(--amber-800); font-family:var(--mono)">19%</b></span>
+        <span>hitl → resume <b style="color:var(--gray-800); font-family:var(--mono)">4m 18s p50</b></span>
+        <span>fraud → esc <b style="color:var(--red-800); font-family:var(--mono)">4.2%</b></span>
+      </div>
+    </div>
+
+    <div class="foot-block">
+      <h5>Last dream · team-uw</h5>
+      <div class="dream-foot">
+        14h ago · 218 sessions → <b>4 edits proposed</b>, <b>2 pending</b> CRO.
+        <br/>
+        <span class="cta">open dream review →</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
